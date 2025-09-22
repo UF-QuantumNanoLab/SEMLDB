@@ -7,6 +7,8 @@ import os
 import torch
 import torch.nn as nn
 
+from .. import MODELS
+
 
 class BiGRU(nn.Module):
     def __init__(self, embed_size, output_size, num_layers=2):
@@ -312,6 +314,13 @@ def balcntsweep(Cins, dcnt, alpha, Vfb,Vgv, Vdv,Lch=12e-9, draw=False, config=No
             Qbal[iig,iid],Idbal[iig,iid]=cntq(Vdb,U,dcnt,config)
     
     return Idbal, None, None, None
+
+
+@MODELS.register()
+class CNTFET:
+    simulation_func = {'rnn': lambda parameters: run_rnn_sim(parameters, SimulationConfig)}
+    device_params = ['tox', 'Lg', 'eps_ox', 'd_cnt', 'V_th', 'sca_flag']
+    postprocess = staticmethod(get_adjusted_simulation_data)
 
 
 if __name__ == "__main__":

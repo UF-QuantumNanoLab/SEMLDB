@@ -6,6 +6,8 @@ import pandas as pd
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.base import BaseEstimator, TransformerMixin
 
+from .. import MODELS
+
 
 IdVd_config = {
     'size_0'              : 900,
@@ -319,3 +321,10 @@ def run_AE_sim(parameters):
     }
     
     return return_body
+
+
+@MODELS.register()
+class HFET:
+    simulation_func = {'autoencoder': run_AE_sim}
+    device_params = ['Lsg', 'Lgd', 'Lg', 'hpas', 'hAlGaN', 'hch', 'hg']
+    postprocess = staticmethod(get_simulation_data)
