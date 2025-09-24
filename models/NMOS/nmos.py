@@ -147,7 +147,7 @@ def get_simulation_data(db_helper, sim_type, parameters):
     return adjusted_data, exact_match, distance, matched_params
 
 def run_AE_sim(parameters):
-    Lg, THF, XjSD = parameters.get('Lg'), parameters.get('THF'), parameters.get('XjSD')
+    Lg, THF, XjSD = 1e-3*parameters.get('Lg'), 1e-3*parameters.get('THF'), 1e-3*parameters.get('XjSD')
 
     feature_names   = ['Lg', 'THF', 'XjSD']
     x = [Lg, THF, XjSD]
