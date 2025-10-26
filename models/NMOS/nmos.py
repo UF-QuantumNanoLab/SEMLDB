@@ -1,4 +1,5 @@
 import torch
+import os
 import torch.nn as nn
 import joblib
 import numpy as np
@@ -152,18 +153,19 @@ def run_AE_sim(parameters):
     x_df = pd.DataFrame([x], columns=feature_names)
 
     # IdVd inference section
-    parent_path = './models/NMOS/idvd_nmos_3_par_4_curves_linear/'
+    model_dir = os.path.dirname(__file__)
+    parent_path = os.path.join(model_dir, 'idvd_nmos_3_par_4_curves_linear/')
     IdVd_AE = Autoencoder(**IdVd_config)
-    IdVd_AE.load_state_dict(torch.load(parent_path + 'idvd_nmos_4_curves_linear_scale.pth', map_location=torch.device('cpu')))
+    IdVd_AE.load_state_dict(torch.load(os.path.join(parent_path, 'idvd_nmos_4_curves_linear_scale.pth'), map_location=torch.device('cpu')))
     IdVd_AE.eval()
 
     IdVd_LS_poly = LatentSpacePolyNN(dim_input=IdVd_config['LS_input_f_size'], dim_output=IdVd_config['latent_size'])
-    IdVd_LS_poly.load_state_dict(torch.load(parent_path + 'idvd_nmos_poly_regression_model.pth', map_location=torch.device('cpu')))
+    IdVd_LS_poly.load_state_dict(torch.load(os.path.join(parent_path, 'idvd_nmos_poly_regression_model.pth'), map_location=torch.device('cpu')))
     IdVd_LS_poly.eval()
 
-    IdVd_scaler_x = joblib.load(parent_path + 'idvd_nmos_scaler_x.pkl')
-    IdVd_scaler_y_IV = joblib.load(parent_path + 'idvd_nmos_scaler_iv.pkl')
-    IdVdscaler_ls = joblib.load(parent_path + 'idvd_nmos_scaler_ls.pkl')
+    IdVd_scaler_x = joblib.load(os.path.join(parent_path, 'idvd_nmos_scaler_x.pkl'))
+    IdVd_scaler_y_IV = joblib.load(os.path.join(parent_path, 'idvd_nmos_scaler_iv.pkl'))
+    IdVdscaler_ls = joblib.load(os.path.join(parent_path, 'idvd_nmos_scaler_ls.pkl'))
 
     x_scaled = IdVd_scaler_x.transform(x_df)
     x_features = polynomial_features(x_scaled, IdVd_config['degree'], IdVd_config['cross_degree'])
@@ -178,19 +180,20 @@ def run_AE_sim(parameters):
     IdVd = IdVd_scaler_y_IV.inverse_transform(decoder_output.reshape(1,-1)).reshape((4, -1))
 
     # IdVg inference section
-    parent_path = './models/NMOS/idvg_nmos_3_par_2_curves_log_linear/'
+    model_dir = os.path.dirname(__file__)
+    parent_path = os.path.join(model_dir, 'idvg_nmos_3_par_2_curves_log_linear/')
     IdVg_AE = Autoencoder(**IdVg_config)
-    IdVg_AE.load_state_dict(torch.load(parent_path + 'idvg_nmos_2_curves_log_linear_scale.pth', map_location=torch.device('cpu')))
+    IdVg_AE.load_state_dict(torch.load(os.path.join(parent_path, 'idvg_nmos_2_curves_log_linear_scale.pth'), map_location=torch.device('cpu')))
     IdVg_AE.eval()
 
     IdVg_LS_poly = LatentSpacePolyNN(dim_input=IdVg_config['LS_input_f_size'], dim_output=IdVg_config['latent_size'])
-    IdVg_LS_poly.load_state_dict(torch.load(parent_path + 'idvg_nmos_poly_regression_model.pth', map_location=torch.device('cpu')))
+    IdVg_LS_poly.load_state_dict(torch.load(os.path.join(parent_path, 'idvg_nmos_poly_regression_model.pth'), map_location=torch.device('cpu')))
     IdVg_LS_poly.eval()
 
-    IdVg_scaler_x = joblib.load(parent_path + 'idvg_scaler_x.pkl')
-    IdVg_scaler_y_IV = joblib.load(parent_path + 'idvg_scaler_iv_linear.pkl')
-    IdVg_scaler_y_IV_log = joblib.load(parent_path + 'idvg_scaler_iv_log.pkl')
-    IdVgscaler_ls = joblib.load(parent_path + 'idvg_scaler_ls.pkl')
+    IdVg_scaler_x = joblib.load(os.path.join(parent_path, 'idvg_scaler_x.pkl'))
+    IdVg_scaler_y_IV = joblib.load(os.path.join(parent_path, 'idvg_scaler_iv_linear.pkl'))
+    IdVg_scaler_y_IV_log = joblib.load(os.path.join(parent_path, 'idvg_scaler_iv_log.pkl'))
+    IdVgscaler_ls = joblib.load(os.path.join(parent_path, 'idvg_scaler_ls.pkl'))
 
     x_scaled = IdVg_scaler_x.transform(x_df)
     x_features = polynomial_features(x_scaled, IdVg_config['degree'], IdVg_config['cross_degree'])
@@ -230,4 +233,5 @@ def run_AE_sim(parameters):
 class NMOS:
     simulation_func = run_AE_sim
     device_params = ['Lg', 'THF', 'XjSD']
+    voltage_params = None
     postprocess = get_simulation_data

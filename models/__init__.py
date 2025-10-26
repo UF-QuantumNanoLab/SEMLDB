@@ -17,6 +17,7 @@ def create_model_config():
             'simulation_func': device_class.simulation_func,
             'device_params': device_class.device_params,
             'postprocess': device_class.postprocess,
+            'voltage_params': device_class.voltage_params,
         }
     return config
 

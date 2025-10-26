@@ -1,4 +1,5 @@
 import torch
+import os
 import torch.nn as nn
 import joblib
 import numpy as np
@@ -175,18 +176,19 @@ def run_AE_sim(parameters):
 
     if (hch > 0.019 * hch / hAlGaN - 0.002):
         # IdVd inference section
-        parent_path = './models/HFET/IdVd/'
+        model_dir = os.path.dirname(__file__)
+        parent_path = os.path.join(model_dir, 'IdVd/')
         IdVd_AE = Autoencoder(**IdVd_config)
-        IdVd_AE.load_state_dict(torch.load(parent_path + 'idvd_3_curves_linear_scale_hch_hAlGaN_filter.pth', map_location=torch.device('cpu')))
+        IdVd_AE.load_state_dict(torch.load(os.path.join(parent_path, 'idvd_3_curves_linear_scale_hch_hAlGaN_filter.pth'), map_location=torch.device('cpu')))
         IdVd_AE.eval()
 
         IdVd_LS_poly = LatentSpacePolyNN(dim_input=IdVd_config['LS_input_f_size'], dim_output=IdVd_config['latent_size'])
-        IdVd_LS_poly.load_state_dict(torch.load(parent_path + 'idvd_3_curves_linear_scale_poly_hch_hAlGaN_filter.pth', map_location=torch.device('cpu')))
+        IdVd_LS_poly.load_state_dict(torch.load(os.path.join(parent_path, 'idvd_3_curves_linear_scale_poly_hch_hAlGaN_filter.pth'), map_location=torch.device('cpu')))
         IdVd_LS_poly.eval()
 
-        IdVd_scaler_x = joblib.load(parent_path + 'scaler_x.pkl')
-        IdVd_scaler_y_IV = joblib.load(parent_path + 'scaler_iv.pkl')
-        IdVdscaler_ls = joblib.load(parent_path + 'scaler_ls.pkl')
+        IdVd_scaler_x = joblib.load(os.path.join(parent_path, 'scaler_x.pkl'))
+        IdVd_scaler_y_IV = joblib.load(os.path.join(parent_path, 'scaler_iv.pkl'))
+        IdVdscaler_ls = joblib.load(os.path.join(parent_path, 'scaler_ls.pkl'))
 
         x_scaled = IdVd_scaler_x.transform(x_df)
         x_features = polynomial_features(x_scaled, IdVd_config['degree'], IdVd_config['cross_degree'])
@@ -204,19 +206,20 @@ def run_AE_sim(parameters):
         IdVd = np.zeros((3, 300))
 
     # IdVg inference section
-    parent_path = './models/HFET/IdVg/'
+    model_dir = os.path.dirname(__file__)
+    parent_path = os.path.join(model_dir, 'IdVg/')
     IdVg_AE = Autoencoder(**IdVg_config)
-    IdVg_AE.load_state_dict(torch.load(parent_path + 'idvg_2_curves_log_linear_scale.pth', map_location=torch.device('cpu')))
+    IdVg_AE.load_state_dict(torch.load(os.path.join(parent_path, 'idvg_2_curves_log_linear_scale.pth'), map_location=torch.device('cpu')))
     IdVg_AE.eval()
 
     IdVg_LS_poly = LatentSpacePolyNN(dim_input=IdVg_config['LS_input_f_size'], dim_output=IdVg_config['latent_size'])
-    IdVg_LS_poly.load_state_dict(torch.load(parent_path + 'poly_regression_model.pth', map_location=torch.device('cpu')))
+    IdVg_LS_poly.load_state_dict(torch.load(os.path.join(parent_path, 'poly_regression_model.pth'), map_location=torch.device('cpu')))
     IdVg_LS_poly.eval()
 
-    IdVg_scaler_x = joblib.load(parent_path + 'scaler_x.pkl')
-    IdVg_scaler_y_IV = joblib.load(parent_path + 'scaler_iv_linear.pkl')
-    IdVg_scaler_y_IV_log = joblib.load(parent_path + 'scaler_iv_log.pkl')
-    IdVgscaler_ls = joblib.load(parent_path + 'scaler_ls.pkl')
+    IdVg_scaler_x = joblib.load(os.path.join(parent_path, 'scaler_x.pkl'))
+    IdVg_scaler_y_IV = joblib.load(os.path.join(parent_path, 'scaler_iv_linear.pkl'))
+    IdVg_scaler_y_IV_log = joblib.load(os.path.join(parent_path, 'scaler_iv_log.pkl'))
+    IdVgscaler_ls = joblib.load(os.path.join(parent_path, 'scaler_ls.pkl'))
 
     x_scaled = IdVg_scaler_x.transform(x_df)
     x_features = polynomial_features(x_scaled, IdVg_config['degree'], IdVg_config['cross_degree'])
@@ -233,19 +236,20 @@ def run_AE_sim(parameters):
     IdVg, IdVg_log = IdVg_scaler_y_IV.inverse_transform(IdVg_linear_scaled.reshape(1,-1)).reshape((2, -1)), IdVg_scaler_y_IV_log.inverse_transform(IdVg_log_scaled.reshape(1,-1)).reshape((2, -1))
 
     # IgVg inference section
-    parent_path = './models/HFET/IgVg/'
+    model_dir = os.path.dirname(__file__)
+    parent_path = os.path.join(model_dir, 'IgVg/')
     IgVg_AE = Autoencoder(**IgVg_config)
-    IgVg_AE.load_state_dict(torch.load(parent_path + 'igvg_2_curves_log_linear_scale.pth', map_location=torch.device('cpu')))
+    IgVg_AE.load_state_dict(torch.load(os.path.join(parent_path, 'igvg_2_curves_log_linear_scale.pth'), map_location=torch.device('cpu')))
     IgVg_AE.eval()
 
     IgVg_LS_poly = LatentSpacePolyNN(dim_input=IgVg_config['LS_input_f_size'], dim_output=IgVg_config['latent_size'])
-    IgVg_LS_poly.load_state_dict(torch.load(parent_path + 'poly_regression_model.pth', map_location=torch.device('cpu')))
+    IgVg_LS_poly.load_state_dict(torch.load(os.path.join(parent_path, 'poly_regression_model.pth'), map_location=torch.device('cpu')))
     IgVg_LS_poly.eval()
 
-    IgVg_scaler_x = joblib.load(parent_path + 'scaler_x.pkl')
-    IgVg_scaler_y_IV = joblib.load(parent_path + 'scaler_iv_linear.pkl')
-    IgVg_scaler_y_IV_log = joblib.load(parent_path + 'scaler_iv_log.pkl')
-    IgVgscaler_ls = joblib.load(parent_path + 'scaler_ls.pkl')
+    IgVg_scaler_x = joblib.load(os.path.join(parent_path, 'scaler_x.pkl'))
+    IgVg_scaler_y_IV = joblib.load(os.path.join(parent_path, 'scaler_iv_linear.pkl'))
+    IgVg_scaler_y_IV_log = joblib.load(os.path.join(parent_path, 'scaler_iv_log.pkl'))
+    IgVgscaler_ls = joblib.load(os.path.join(parent_path, 'scaler_ls.pkl'))
 
     x_scaled = IgVg_scaler_x.transform(x_df)
     x_features = polynomial_features(x_scaled, IgVg_config['degree'], IgVg_config['cross_degree'])
@@ -262,18 +266,19 @@ def run_AE_sim(parameters):
     IgVg, IgVg_log = IgVg_scaler_y_IV.inverse_transform(IgVg_linear_scaled.reshape(1,-1)).reshape((2, -1)), IgVg_scaler_y_IV_log.inverse_transform(IgVg_log_scaled.reshape(1,-1)).reshape((2, -1))
 
     # BV curve section
-    parent_path = './models/HFET/BV/'
+    model_dir = os.path.dirname(__file__)
+    parent_path = os.path.join(model_dir, 'BV/')
     BV_AE = Autoencoder(**BV_config)
-    BV_AE.load_state_dict(torch.load(parent_path + 'bv_curve_log_linear_scale.pth', map_location=torch.device('cpu')))
+    BV_AE.load_state_dict(torch.load(os.path.join(parent_path, 'bv_curve_log_linear_scale.pth'), map_location=torch.device('cpu')))
     BV_AE.eval()
 
     BV_LS_poly = LatentSpacePolyNN(dim_input=BV_config['LS_input_f_size'], dim_output=BV_config['latent_size'])
-    BV_LS_poly.load_state_dict(torch.load(parent_path + 'bv_poly_regression_model.pth', map_location=torch.device('cpu')))
+    BV_LS_poly.load_state_dict(torch.load(os.path.join(parent_path, 'bv_poly_regression_model.pth'), map_location=torch.device('cpu')))
     BV_LS_poly.eval()
 
-    BV_scaler_x = joblib.load(parent_path + 'scaler_bv_x.pkl')
-    BV_scaler_y_IV_log = joblib.load(parent_path + 'scaler_bv_log.pkl')
-    BVscaler_ls = joblib.load(parent_path + 'scaler_bv_ls.pkl')
+    BV_scaler_x = joblib.load(os.path.join(parent_path, 'scaler_bv_x.pkl'))
+    BV_scaler_y_IV_log = joblib.load(os.path.join(parent_path, 'scaler_bv_log.pkl'))
+    BVscaler_ls = joblib.load(os.path.join(parent_path, 'scaler_bv_ls.pkl'))
 
     x_scaled = BV_scaler_x.transform(x_df)
     x_features = polynomial_features(x_scaled, BV_config['degree'], BV_config['cross_degree'])
@@ -323,4 +328,5 @@ def run_AE_sim(parameters):
 class HFET:
     simulation_func = run_AE_sim
     device_params = ['Lsg', 'Lgd', 'Lg', 'hpas', 'hAlGaN', 'hch', 'hg']
+    voltage_params = None
     postprocess = get_simulation_data

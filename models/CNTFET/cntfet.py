@@ -69,19 +69,49 @@ class SimulationConfig:
     dcnt = 1e-9
 
 def convert_str_to_float(data):
-    # If the data is a dictionary, iterate through its items
     if isinstance(data, dict):
         for key, value in data.items():
-            # Recursively call the function if the value is another dictionary
             if isinstance(value, dict):
                 data[key] = convert_str_to_float(value)
-            # Convert to float if the value is a string and can be converted
             elif isinstance(value, str):
                 try:
                     data[key] = float(value)
                 except ValueError:
-                    pass  # Ignore values that cannot be converted to float
+                    pass
     return data
+
+def parse_voltage_input(v_input):
+    """Parse voltage input into numpy array
+
+    Args:
+        v_input: Can be:
+            - scalar (float/int): single value
+            - list/array: explicit values
+            - dict with 'start', 'end', 'step': linspace specification
+
+    Returns:
+        numpy.ndarray: voltage values
+    """
+    if v_input is None:
+        raise ValueError("Voltage input cannot be None")
+
+    if isinstance(v_input, (int, float)):
+        return np.array([float(v_input)])
+
+    elif isinstance(v_input, (list, tuple)):
+        return np.array(v_input, dtype=float)
+
+    elif isinstance(v_input, np.ndarray):
+        return v_input.astype(float)
+
+    elif isinstance(v_input, dict):
+        if 'start' in v_input and 'end' in v_input and 'step' in v_input:
+            return np.linspace(v_input['start'], v_input['end'], v_input['step'])
+        else:
+            raise ValueError("Dict format must contain 'start', 'end', 'step' keys")
+
+    else:
+        raise ValueError(f"Unsupported voltage input type: {type(v_input)}")
 
 def get_adjusted_simulation_data(db_helper, parameters):
     """
@@ -156,43 +186,31 @@ def get_adjusted_simulation_data(db_helper, parameters):
     return adjusted_data, exact_match, distance, matched_params
 
 def run_rnn_sim(parameters, config):
-    vth = parameters.get('V_th', 0.258)  # Default to 0.258 if not provided
+    vth = parameters.get('V_th', 0.258)
     scale_factor = 4.049253845214844
     parameters = convert_str_to_float(parameters)
 
     model = BiGRU(embed_size=32, output_size=2, num_layers=3)
     d_cnt, sca_flag = parameters.get('d_cnt', 1.02), parameters.get('sca_flag', 0)
-    model.load_state_dict(torch.load(os.path.join(f'./models/CNTFET/pretrained_rnn_dcnt{d_cnt}_sca{sca_flag}.pth'), map_location=torch.device('cpu')))
+    model_dir = os.path.dirname(__file__)
+    model_path = os.path.join(model_dir, f'pretrained_rnn_dcnt{d_cnt}_sca{sca_flag}.pth')
+    model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
     model.eval()
-    # test_idx = test_dataset.valid_indices[device_indices[device_idx]]
-    # test_tox = test_dataset.toxdata[test_idx].item()
-    # test_Lch = test_dataset.Lchdata[test_idx].item()
-    # test_eps_ox = test_dataset.epsoxdata[test_idx].item()
-    
-    # print(f"Plotting for device: tox={test_tox}, Lch={test_Lch}, eps_ox={test_eps_ox}")
 
-    # max_current = test_dataset.Iddata.max().item()
-    # scale_factor = max_current / 10.0
-
-    # with torch.no_grad():
-    #     output = model(torch.stack([
-    #             torch.full_like(Vg_mesh.flatten(), test_tox).to(device),
-    #             torch.full_like(Vg_mesh.flatten(), test_Lch).to(device),
-    #             torch.full_like(Vg_mesh.flatten(), test_eps_ox).to(device),
-    #             Vg_mesh.flatten().to(device),
-    #             Vd_mesh.flatten().to(device)
-    #         ], dim=1))
-    #     Id_ratio_pred = output[:, 0]
-    #     Qg_pred = output[:, 1]
-    tox, Lg, eps_ox, Vd, Vg = parameters.get('tox'), parameters.get('Lg'), parameters.get('eps_ox'), parameters.get('Vd'), parameters.get('Vg')
+    tox, Lg, eps_ox = parameters.get('tox'), parameters.get('Lg'), parameters.get('eps_ox')
+    Vd_input, Vg_input = parameters.get('Vd'), parameters.get('Vg')
 
     if not tox or not Lg or not eps_ox:
         print("Missing parameters for device.")
         return None
-    
-    Vdlist = torch.Tensor(np.round(np.linspace(Vd['start'], Vd['end'], Vd['step']), 4))
-    Vglist = torch.Tensor(np.round(np.linspace(Vg['start'], Vg['end'], Vg['step']), 4))
-    Vg_shift_list = Vglist - (vth - 0.258)
+
+    Vd_array = parse_voltage_input(Vd_input)
+    Vg_array = parse_voltage_input(Vg_input)
+
+    Vg_shift_array = Vg_array - (vth - 0.258)
+
+    Vdlist = torch.Tensor(Vd_array)
+    Vg_shift_list = torch.Tensor(Vg_shift_array)
 
     Vd_mesh, Vg_mesh = torch.meshgrid(Vdlist, Vg_shift_list, indexing='ij')
 
@@ -206,20 +224,20 @@ def run_rnn_sim(parameters, config):
             ], dim=1))
         Id_ratio_pred = output[:, 0]
         Qg_pred = output[:, 1]
-    
+
     Id_pred = (torch.exp(Id_ratio_pred).cpu() * torch.log(Vd_mesh.flatten()*10+1) * scale_factor).numpy().reshape(Vd_mesh.shape)*1e-6
     Qg_pred = Qg_pred.cpu().numpy().reshape(Vd_mesh.shape)*1e-18
 
     return_body = {
         'simulation_data': {
-            'Vg': Vglist.numpy().tolist(),
-            'Vd': Vdlist.numpy().tolist(),
+            'Vg': Vg_array.tolist(),
+            'Vd': Vd_array.tolist(),
             'Id': Id_pred.T.tolist(),
             'Qg': Qg_pred.T.tolist()
         },
         'device_params': parameters
     }
-    
+
     return return_body
 
 # def run_rnn_sim(parameters, config):
@@ -315,6 +333,7 @@ def balcntsweep(Cins, dcnt, alpha, Vfb,Vgv, Vdv,Lch=12e-9, draw=False, config=No
 class CNTFET:
     simulation_func = lambda parameters: run_rnn_sim(parameters, SimulationConfig)
     device_params = ['tox', 'Lg', 'eps_ox', 'd_cnt', 'V_th', 'sca_flag']
+    voltage_params = ['Vg', 'Vd']
     postprocess = get_adjusted_simulation_data
 
 
