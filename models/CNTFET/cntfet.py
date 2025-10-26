@@ -212,12 +212,10 @@ def run_rnn_sim(parameters, config):
 
     return_body = {
         'simulation_data': {
-            'RNN': {
-                'Vg': Vglist.numpy().tolist(),
-                'Vd': Vdlist.numpy().tolist(),
-                'Id': Id_pred.T.tolist(),
-                'Qg': Qg_pred.T.tolist()
-            }
+            'Vg': Vglist.numpy().tolist(),
+            'Vd': Vdlist.numpy().tolist(),
+            'Id': Id_pred.T.tolist(),
+            'Qg': Qg_pred.T.tolist()
         },
         'device_params': parameters
     }

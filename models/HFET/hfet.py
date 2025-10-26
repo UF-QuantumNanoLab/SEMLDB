@@ -291,28 +291,26 @@ def run_AE_sim(parameters):
 
     return_body = {
         'simulation_data': {
-            'AutoEncoder': {
-                'Id_Vd': {
-                        'Vg': [1.0, 3.0, 5.0],
-                        'Vd': np.linspace(0.02, 18, IdVd.shape[1]).tolist(),
-                        'Id': IdVd.tolist(),
-                    },
-                'Id_Vg': {
-                        'Vg': np.linspace(-1.9, 7, IdVg.shape[1]).tolist(),
-                        'Vd': [1.0, 15.0],
-                        'Id': IdVg.tolist(),
-                        'Id_log': IdVg_log.tolist(),
-                    },
-                'Ig_Vg': {
-                        'Vg': np.linspace(-1.9, 7, IdVg.shape[1]).tolist(),
-                        'Vd': [1.0, 15.0],
-                        'Ig': IgVg.tolist(),
-                        'Ig_log': IgVg_log.tolist(),
-                    },
-                'Id_Vd_BVOutput': {
-                        'Vd': np.linspace(2, 1000, IdVg_BV_log.shape[0]).tolist(),
-                        'Id_log': IdVg_BV_log.tolist(),
-                }
+            'Id_Vd': {
+                    'Vg': [1.0, 3.0, 5.0],
+                    'Vd': np.linspace(0.02, 18, IdVd.shape[1]).tolist(),
+                    'Id': IdVd.tolist(),
+                },
+            'Id_Vg': {
+                    'Vg': np.linspace(-1.9, 7, IdVg.shape[1]).tolist(),
+                    'Vd': [1.0, 15.0],
+                    'Id': IdVg.tolist(),
+                    'Id_log': IdVg_log.tolist(),
+                },
+            'Ig_Vg': {
+                    'Vg': np.linspace(-1.9, 7, IdVg.shape[1]).tolist(),
+                    'Vd': [1.0, 15.0],
+                    'Ig': IgVg.tolist(),
+                    'Ig_log': IgVg_log.tolist(),
+                },
+            'Id_Vd_BVOutput': {
+                    'Vd': np.linspace(2, 1000, IdVg_BV_log.shape[0]).tolist(),
+                    'Id_log': IdVg_BV_log.tolist(),
             }
         },
         'device_params': parameters
