@@ -28,13 +28,5 @@ setup(
         'joblib',
         'scikit-learn>=1.0.0',
     ],
-    extras_require={
-        'server': [
-            'flask>=3.0.0',
-            'flask-cors>=4.0.0',
-            'flask-restx>=1.3.0',
-            'pymongo',
-        ],
-    },
     python_requires='>=3.8',
 )
