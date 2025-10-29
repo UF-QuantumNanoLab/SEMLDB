@@ -1,9 +1,10 @@
 # semldb - Semiconductor Machine Learning Models and Database
 
-Semiconductor device simulation using machine learning models. Supports multiple device types including CNTFET, NMOS, and HFET.
+Semiconductor device simulation using machine learning models. Supports multiple device types including carbon nanotube field-effect transistors (CNTFET), Silicon MOSFET, and heterojunction FET (HFET).
 
 ## Quick Start
 ## Table of Contents
+- [Run nanoHUB Simulation](#run-nanohub-simulation)
 - [API Usage](#api-usage)
 - [Installation and Usage](#installation-and-usage)
 - [Adding a New Device](#adding-a-new-device)
@@ -11,6 +12,12 @@ Semiconductor device simulation using machine learning models. Supports multiple
 
 ---
 
+## Run nanoHUB Simulation
+
+You can directly run the **semldb** tool online via nanoHUB without installation:  
+🔗 [https://nanohub.org/resources/semldb/](https://nanohub.org/resources/semldb/)
+
+---
 ## API Usage
 
 semldb provides a RESTful API for running device simulations remotely. This is useful for web applications, cloud-based workflows, or when you want to access the simulation engine without installing Python locally.
