@@ -125,8 +125,21 @@ def get_simulation_data(db_helper, parameters):
     if not complete_data:
         return None, False, None, None
     
+    simulation_data = complete_data.get('simulation_data', {})
+    Id_Vg = simulation_data.get('Id_Vg', {})
+    Id_Vd = simulation_data.get('Id_Vd', {})
+    
+    Id_Vg['Id'] = (np.array(Id_Vg['Id']) * 1e6).tolist()
+    id_log_data = Id_Vg.get('Id_log')
+    if id_log_data is not None:
+        Id_Vg['Id_log'] = (np.array(Id_Vg['Id_log']) + 6).tolist()
+    Id_Vd['Id'] = (np.array(Id_Vd['Id']) * 1e6).tolist()
+
+    simulation_data['Id_Vg'] = Id_Vg
+    simulation_data['Id_Vd'] = Id_Vd
+    
     adjusted_data = {
-        'simulation_data': complete_data.get('simulation_data', {}),
+        'simulation_data': simulation_data,
         'device_params': complete_data.get('device_params', {})
     }
     
