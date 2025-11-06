@@ -5,6 +5,7 @@ MODELS = Registry("MODELS")
 from .CNTFET.cntfet import CNTFET  # noqa: F401
 from .HFET.hfet import HFET  # noqa: F401
 from .NMOS.nmos import NMOS  # noqa: F401
+from .DiamondFET.diamondfet import DiamondFET
 
 
 def create_model_config():

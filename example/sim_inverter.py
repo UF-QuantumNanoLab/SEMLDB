@@ -30,6 +30,7 @@ def generate_device_characteristics(grid_size=81, voltage_range=(0, 0.5), save_t
     
     params = {
         "device_type": "CNTFET",
+        'sim_type': 'rnn',
         "parameters": {
             **device_params,
             'Vg': {
