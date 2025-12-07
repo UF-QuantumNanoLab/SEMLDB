@@ -26,6 +26,7 @@ setup(
             'DiamondFET/ft_diamond_1_curve_linear/*.pkl',
             'DiamondFET/cv_diamond_2_curves_linear/*.pth',
             'DiamondFET/cv_diamond_2_curves_linear/*.pkl',
+            'NanosheetFET/*.pth',
         ],
     },
     install_requires=[

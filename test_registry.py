@@ -18,7 +18,8 @@ def test_registry():
     
     for device_name, config in MODEL_CONFIG.items():
         print(f"\n{device_name} configuration:")
-        print(f"  - simulation_func keys: {list(config['simulation_func'].keys())}")
+        # print(f"  - simulation_func keys: {list(config['simulation_func'].keys())}")
+        print(f"  - simulation_func: {config['simulation_func']}")
         print(f"  - device_params: {config['device_params']}")
         print(f"  - postprocess: {config['postprocess']}")
     
