@@ -348,7 +348,7 @@ def get_adjusted_simulation_data(db_helper, parameters):
     step = 0.0125
     index_shift = -int(round(vth_shift / step))
 
-    start_vg_index, end_vg_index = 0, len(vg_values) - 1
+    start_vg_index, end_vg_index = 0, len(vg_values)
     
     start_idx = start_vg_index + index_shift
     end_idx = end_vg_index + index_shift
