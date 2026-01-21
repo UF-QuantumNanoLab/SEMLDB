@@ -355,7 +355,7 @@ def get_adjusted_simulation_data(db_helper, parameters):
 
     total_points = len(vg_values)
     start_idx = max(0, min(start_idx, total_points - 1))
-    end_idx = max(0, min(end_idx, total_points - 1))
+    end_idx = max(0, min(end_idx, total_points))
 
     selected_vg = vg_values[start_idx:end_idx]
     selected_id = id_data[start_idx:end_idx] 
