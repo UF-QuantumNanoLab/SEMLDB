@@ -318,24 +318,28 @@ class TwoTowerNNVSModel(nn.Module):
 
         return log_Id, param_dict, {'dI_dVg': dI_dVg, 'dI_dVd': dI_dVd}
 
-
 def get_adjusted_simulation_data(db_helper, parameters):
     """Mirror CNTFET Vth shifting logic for SiFET."""
-    vth = parameters.get('V_th', 0.150)
+    vth = parameters.get('V_th', 0.20)
 
-    if vth < 0.10 or vth > 0.50:
-        return None, False, None, None, "Threshold voltage must be between 0.10 and 0.50"
+    if vth < 0.10 or vth > 0.35:
+        return None, False, None, None, "Threshold voltage must be between 0.10 and 0.35"
 
-    vth_shift = vth - 0.150
+
+    vth_shift = vth - 0.20
+
 
     db_query_params = {k: v for k, v in parameters.items() if k != 'V_th'}
+
 
     complete_data, exact_match, distance, matched_params = db_helper.get_simulation_data(
         'SiFET', db_query_params
     )
 
+
     if not complete_data:
         return None, False, None, None
+
 
     vg_values = complete_data.get('simulation_data', {}).get('Vg', [])
     vd_values = complete_data.get('simulation_data', {}).get('Vd', [])
@@ -343,25 +347,28 @@ def get_adjusted_simulation_data(db_helper, parameters):
     qg_data = complete_data.get('simulation_data', {}).get('Qg', [])
 
 
-
-
     step = 0.0125
     index_shift = -int(round(vth_shift / step))
 
-    start_vg_index, end_vg_index = 0, len(vg_values)
+
+    start_vg_index, end_vg_index = 12, 53
     
     start_idx = start_vg_index + index_shift
     end_idx = end_vg_index + index_shift
 
+
     total_points = len(vg_values)
-    start_idx = max(0, min(start_idx, total_points - 1))
+    start_idx = max(0, min(start_idx, total_points))
     end_idx = max(0, min(end_idx, total_points))
+    
+
 
     selected_vg = vg_values[start_idx:end_idx]
     selected_id = id_data[start_idx:end_idx] 
     selected_qg = qg_data[start_idx:end_idx]
  
     shifted_vg = [round(vg+vth_shift, 4) for vg in selected_vg]
+
 
     adjusted_data = {
         'simulation_data': {
@@ -373,9 +380,12 @@ def get_adjusted_simulation_data(db_helper, parameters):
         'device_params': complete_data.get('device_params', {})
     }
 
+
     adjusted_data['device_params']['V_th'] = vth
 
+
     return adjusted_data, exact_match, distance, matched_params
+
 
 
 def _load_twotower_model(embed_size=16):
@@ -396,7 +406,7 @@ def _load_twotower_model(embed_size=16):
 
 def run_twotower_sim(parameters, config=None):
     """Run SiFET simulation using the Two-Tower Hybrid DGFET model."""
-    vth = parameters.get('V_th', 0.150)
+    vth = parameters.get('V_th', 0.20)
     parameters = convert_str_to_float(parameters)
     tox = parameters.get('tox')
     Lg = parameters.get('Lg')
@@ -410,7 +420,7 @@ def run_twotower_sim(parameters, config=None):
     Vd_array = parse_voltage_input(Vd_input)
     Vg_array = parse_voltage_input(Vg_input)
 
-    Vg_shift_array = Vg_array - (vth - 0.150)
+    Vg_shift_array = Vg_array - (vth - 0.20)
 
     Vd_tensor = torch.tensor(Vd_array, dtype=torch.float32)
     Vg_shift_list = torch.tensor(Vg_shift_array, dtype=torch.float32)
@@ -428,9 +438,9 @@ def run_twotower_sim(parameters, config=None):
             Vd_mesh.flatten()
         )
 
-    Id_pred = torch.exp(log_Id_pred).cpu().numpy().reshape(Vd_mesh.shape) * 1e-3
-    Qg_pred = param_dict.get('Q', torch.zeros_like(Vg_mesh.flatten())) 
-    Qg_pred = Qg_pred.cpu().numpy().reshape(Vd_mesh.shape) * 1e-10
+    Id_pred = torch.exp(log_Id_pred).cpu().numpy().reshape(Vd_mesh.shape) *1e-3  # Convert mA to A
+    Qg_pred = param_dict.get('Q', torch.zeros_like(Vg_mesh.flatten())) *1e-10  # Convert nC to C
+    Qg_pred = Qg_pred.cpu().numpy().reshape(Vd_mesh.shape) 
 
     return_body = {
         'simulation_data': {
