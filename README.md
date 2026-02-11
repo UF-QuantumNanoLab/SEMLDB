@@ -1,5 +1,7 @@
 # semldb - Semiconductor Machine Learning Models and Database
 
+![SEMLDB Overview](Figs/SEMLDB_Overview.png)
+
 Semiconductor device simulation using machine learning models. Supports multiple device types including carbon nanotube field-effect transistors (CNTFET), Silicon MOSFET, and heterojunction FET (HFET).
 
 ## Quick Start
