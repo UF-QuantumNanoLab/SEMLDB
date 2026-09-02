@@ -1,4 +1,4 @@
-numpy
+numpy>=2.0
 pandas
 scipy
 flask==3.0.2

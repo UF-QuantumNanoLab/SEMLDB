@@ -12,7 +12,11 @@ RUN apt-get update && apt-get install -y \
 
 # Install Python dependencies
 COPY requirements.txt .
-RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+RUN python -m pip install --upgrade pip setuptools wheel
+RUN python -m pip install --no-cache-dir \
+    --index-url https://download.pytorch.org/whl/cpu \
+    --extra-index-url https://pypi.org/simple \
+    torch torchvision torchaudio
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Create the runtime stage
