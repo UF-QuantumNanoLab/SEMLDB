@@ -8,7 +8,7 @@ from .NMOS.nmos import NMOS  # noqa: F401
 from .DiamondFET.diamondfet import DiamondFET
 from .SiFET.sifet import SiFET
 from .UMOS.umos import UMOS
-
+from .TwoDFET.twodfet import TwoDFET
 
 def create_model_config():
     """Create MODEL_CONFIG from registered models"""
