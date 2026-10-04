@@ -281,8 +281,9 @@ class TwoTowerNNVSModel(nn.Module):
         vdsat_raw = full_output[:, 2]
         vdsat = 0.01 + 0.39 * torch.sigmoid(vdsat_raw)
 
-        # Inversion capacitance
-        Cinv = 1e12 * epsr * self.epso / tox  # [F/m]
+        # Scaled oxide capacitance density: 1e9 converts tox from nm to m
+        # (giving F/m^2), and the extra 1e3 matches the training Id scaling.
+        Cinv = 1e12 * epsr * self.epso / tox
 
         F_softplus = self.softplus((Vg - Vt) / (n * self.phi))
 
@@ -438,8 +439,8 @@ def run_twotower_sim(parameters, config=None):
             Vd_mesh.flatten()
         )
 
-    Id_pred = torch.exp(log_Id_pred).cpu().numpy().reshape(Vd_mesh.shape) *1e-3  # Convert mA to A
-    Qg_pred = param_dict.get('Q', torch.zeros_like(Vg_mesh.flatten())) *1e-10  # Convert nC to C
+    Id_pred = torch.exp(log_Id_pred).cpu().numpy().reshape(Vd_mesh.shape) *1e-3  # Undo training's 1e3 Id scaling; return A/um
+    Qg_pred = param_dict.get('Q', torch.zeros_like(Vg_mesh.flatten())) *1e-10  # Undo training's 1e10 Q scaling; return C/m
     Qg_pred = Qg_pred.cpu().numpy().reshape(Vd_mesh.shape) 
 
     return_body = {
