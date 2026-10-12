@@ -6,7 +6,7 @@ setup(
     description='Semiconductor Machine Learning Models and Database',
     author='semldb',
     py_modules=['semldb'],
-    packages=['models', 'models.CNTFET', 'models.NMOS', 'models.HFET', 'models.DiamondFET', 'models.TwoDFET', 'utils'],
+    packages=['models', 'models.CNTFET', 'models.NMOS', 'models.HFET', 'models.DiamondFET', 'models.TwoDFET', 'models.Cryogenic', 'utils'],
     package_data={
         'models': [
             'CNTFET/*.pth',
@@ -28,6 +28,9 @@ setup(
             'DiamondFET/cv_diamond_2_curves_linear/*.pkl',
             'TwoDFET/*.pth',
             'TwoDFET/*.pkl',
+            'Cryogenic/*/*/*.pth',
+            'Cryogenic/*/*/*.pkl',
+            'Cryogenic/*/*/*.json',
         ],
     },
     install_requires=[

@@ -1,0 +1,9 @@
+{
+  "degree": 9,
+  "cross_degree": 9,
+  "best_r2": 0.9943848707152554,
+  "best_rmse": 0.017367256913680806,
+  "best_mse": 0.0003016216127057938,
+  "use_torch": false,
+  "loss_code_used": "ridge_mse"
+}
