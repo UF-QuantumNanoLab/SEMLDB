@@ -23,7 +23,8 @@ from .byom_adapter_poly import PolyAdapter
 from .byom_adapter_autoencoder import AEDecoderOnlyAdapter
 
 _MODEL_DIR = os.path.dirname(__file__)
-_FEATURE_SET = ['Temp', 'Lg', 'Tox']
+_FEATURE_SET_Current = ['Temp', 'Lg', 'Tox']
+_FEATURE_SET_Capacitance = ['Temp', 'Tox', 'Lg']
 
 # Latent dimensionality of each sub-model's poly->decoder bridge
 # (from ae_ext_params.json / poly's z0..zN label_set at training time).
@@ -41,6 +42,7 @@ def _get_adapters(curve_name):
     """Lazily construct and cache the (poly, decoder) adapter pair for one curve."""
     if curve_name not in _adapters:
         base = os.path.join(_MODEL_DIR, curve_name)
+        _FEATURE_SET = _FEATURE_SET_Current if curve_name == 'IV' else _FEATURE_SET_Capacitance
         z_labels = [f'z{i}' for i in range(_LATENT_DIMS[curve_name])]
         vg_grid = _VG_IV if curve_name == 'IV' else _VG_CV
 
@@ -74,8 +76,9 @@ _INVERT_LOG = {
 }
 
 
-def _predict_curve(curve_name, x):
+def _predict_curve(curve_name, parameters):
     poly, decoder = _get_adapters(curve_name)
+    x = np.array([[float(parameters[p]) for p in poly.feature_set]])
     z = poly.predict(x)
     y = decoder.predict(z)
     return _INVERT_LOG[curve_name](y[0])
@@ -91,15 +94,13 @@ def run_simulation(parameters):
     Returns:
         dict: {'simulation_data': {...}, 'device_params': parameters}
     """
-    missing = [p for p in _FEATURE_SET if p not in parameters]
+    missing = [p for p in _FEATURE_SET_Current if p not in parameters]
     if missing:
         raise ValueError(f"Missing required parameter(s): {missing}")
 
-    x = np.array([[float(parameters[p]) for p in _FEATURE_SET]])
-
-    id_vg = _predict_curve('IV', x)
-    c_gate = _predict_curve('CVgg', x)
-    c_drain = _predict_curve('CVgd', x)
+    id_vg = _predict_curve('IV', parameters)
+    c_gate = _predict_curve('CVgg', parameters)
+    c_drain = _predict_curve('CVgd', parameters)
 
     return {
         'simulation_data': {
